@@ -1,4 +1,4 @@
 // PUBLIC CONFIGURATION ONLY. Never put passwords or API secrets here.
 window.LEGAL_LIBRARY_CONFIG = {
-  apiBase: "https://REPLACE-WITH-YOUR-WORKER.SUBDOMAIN.workers.dev"
+  apiBase: "https://league-legal-library-api.eeagon.workers.dev"
 };

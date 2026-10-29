@@ -1,0 +1,62 @@
+name: Build private legal search index
+on:
+  workflow_dispatch:
+permissions:
+  contents: write
+concurrency:
+  group: legal-index-update
+  cancel-in-progress: false
+jobs:
+  index:
+    runs-on: ubuntu-latest
+    timeout-minutes: 240
+    steps:
+      - uses: actions/checkout@v4
+      - name: Refuse indexing in a public repository
+        env:
+          REPO_VISIBILITY: ${{ github.event.repository.private }}
+        run: |
+          if [ "$REPO_VISIBILITY" != "true" ]; then
+            echo 'ERROR: this index contains private legal text. Use a private repository for indexing.' >&2
+            exit 1
+          fi
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install OCR and older Word support on GitHub runner
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y --no-install-recommends tesseract-ocr tesseract-ocr-eng libreoffice-writer
+          python -m pip install -r processor/requirements.txt
+          python -m pip install pytest
+      - name: Test indexer
+        run: python -m pytest -q processor/tests
+      - name: Build master index and staged D1 batches
+        env:
+          R2_ENDPOINT: ${{ secrets.R2_ENDPOINT }}
+          R2_ACCESS_KEY_ID: ${{ secrets.R2_ACCESS_KEY_ID }}
+          R2_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}
+          R2_BUCKET: league-legal-private
+        run: python processor/index_r2.py --out build_index --build-id "${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}"
+      - name: Initialize D1 schema and publish staged data
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+        run: |
+          test -n "$CLOUDFLARE_API_TOKEN" && test -n "$CLOUDFLARE_ACCOUNT_ID"
+          cd worker
+          npx --yes wrangler@4 d1 execute league-legal-search --remote --file ../db/schema.sql
+          for file in ../build_index/sql/*.sql; do
+            npx --yes wrangler@4 d1 execute league-legal-search --remote --file "$file"
+          done
+          npx --yes wrangler@4 d1 execute league-legal-search --remote --file ../build_index/activate.sql
+      - name: Save persistent master index in PRIVATE GitHub Release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release create "index-${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}" \
+            build_index/search_master.sqlite3 build_index/manifest.json \
+            --title "Private legal search index ${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}" \
+            --notes "Versioned full-text master index. Contains legal text. Do not share outside authorized users." \
+            --latest=false

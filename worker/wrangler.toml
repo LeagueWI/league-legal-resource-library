@@ -14,7 +14,7 @@ bucket_name = "league-legal-private"
 [[d1_databases]]
 binding = "DB"
 database_name = "league-legal-search"
-database_id = "REPLACE_WITH_YOUR_D1_DATABASE_ID"
+database_id = "cdda8cf7-afe2-4c23-973b-4435a4c39dfc"
 
 # Required Worker secrets, supplied in Cloudflare dashboard, never committed:
 # ACCESS_CODE_HASH (SHA-256 hex of temporary access code)

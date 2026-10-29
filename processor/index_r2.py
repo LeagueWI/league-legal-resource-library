@@ -193,7 +193,7 @@ def build(client,bucket,out:Path,build_id:str):
             db.execute('INSERT INTO passages_fts VALUES (?,?,?,?)',values[1:])
             counts['passages']+=1
     db.commit();db.close();sql.close()
-    (out/'activate.sql').write_text(sqlinsert('meta',['key','value'],['live_build',build_id]),encoding='utf-8')
+    (out/'activate.sql').write_text(sqlinsert('meta',['key','value'],['live_build',build_id]).rstrip().rstrip(';') + " ON CONFLICT(key) DO UPDATE SET value=excluded.value;\n",encoding='utf-8')
     report={'build_id':build_id,'indexed_utc':datetime.now(timezone.utc).isoformat(),
             'resources':counts['total'],'searchable':counts['searchable'],
             'title_only':counts['title-only'],'ocr_pages':counts['ocr_pages'],

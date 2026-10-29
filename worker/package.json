@@ -1,0 +1,1 @@
+{"name":"league-legal-library-worker","version":"1.0.0","private":true,"type":"module","scripts":{"deploy":"wrangler deploy","check":"node --check src/index.js","test":"node --test tests/*.test.js"},"devDependencies":{"wrangler":"^4.0.0"}}

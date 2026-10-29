@@ -1,0 +1,10 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import handler from '../src/index.js';
+const origin='https://leaguewi.github.io';
+const sha=async s=>Array.from(new Uint8Array(await crypto.subtle.digest('SHA-256',new TextEncoder().encode(s)))).map(b=>b.toString(16).padStart(2,'0')).join('');
+function db(){return {prepare(q){const obj={bind(...args){this.args=args;return this;},async first(){return q.includes('COUNT(*)')?{n:3}:null;},async run(){return {success:true};},async all(){return {results:[]};}};return obj;}};}
+async function setup(){return {DB:db(),LEGAL_FILES:{get:async()=>null},SESSION_SECRET:'S'.repeat(64),ACCESS_CODE_HASH:await sha('ValidPilotCodeLong123'),ALLOWED_ORIGIN:origin};}
+test('reject unauthenticated status and search',async()=>{const env=await setup();for(const path of ['/api/status','/api/search?q=meetings','/api/document/'+'a'.repeat(64)]){const r=await handler.fetch(new Request('https://api.example'+path,{headers:{Origin:origin}}),env);assert.equal(r.status,401);}});
+test('reject login from other origins and bad code',async()=>{const env=await setup();let r=await handler.fetch(new Request('https://api.example/api/login',{method:'POST',headers:{Origin:'https://attacker.example','Content-Type':'application/json'},body:JSON.stringify({code:'ValidPilotCodeLong123'})}),env);assert.equal(r.status,403);r=await handler.fetch(new Request('https://api.example/api/login',{method:'POST',headers:{Origin:origin,'Content-Type':'application/json'},body:JSON.stringify({code:'IncorrectLongCode'})}),env);assert.equal(r.status,401);});
+test('valid code grants temporary signed access',async()=>{const env=await setup();let r=await handler.fetch(new Request('https://api.example/api/login',{method:'POST',headers:{Origin:origin,'Content-Type':'application/json'},body:JSON.stringify({code:'ValidPilotCodeLong123'})}),env);assert.equal(r.status,200);const value=await r.json();assert.ok(value.token);r=await handler.fetch(new Request('https://api.example/api/status',{headers:{Origin:origin,Authorization:'Bearer '+value.token}}),env);assert.equal(r.status,200);assert.deepEqual(await r.json(),{resources:3});});

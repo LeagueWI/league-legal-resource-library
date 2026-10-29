@@ -1,0 +1,30 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="theme-color" content="#19286B">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self'; style-src 'self'; connect-src https:; img-src 'self' data: blob:; base-uri 'none'; form-action 'self'; object-src 'none'">
+  <title>Legal Resource Library | League of Wisconsin Municipalities</title>
+  <link rel="stylesheet" href="./styles.css"><script defer src="./config.js"></script><script defer src="./app.js"></script>
+</head>
+<body>
+  <header class="sitehead"><div class="wrap headrow"><div class="brand"><span class="brandmark" aria-hidden="true">L</span><div><small>LEAGUE OF WISCONSIN MUNICIPALITIES</small><div class="brandtitle">Legal Resource Library</div></div></div><span class="pilot">Research Pilot</span></div></header>
+  <main class="wrap">
+    <section class="hero"><p class="eyebrow">LEGAL INFORMATION AND GUIDANCE</p><h1>Find the resource you need.</h1><p>Search across League legal guidance, presentations, reference materials, and historical publications.</p></section>
+    <div id="notice" class="notice" role="status" aria-live="polite"></div>
+    <section id="loginSection" class="gate" aria-labelledby="loginTitle">
+      <div class="gateIcon" aria-hidden="true">&#128274;</div><h2 id="loginTitle">Access the legal library</h2><p>Enter the temporary access code provided by the League to search and view resources.</p>
+      <form id="loginForm"><label for="code">Access code</label><div class="loginRow"><input id="code" type="password" autocomplete="off" required minlength="8" placeholder="Enter access code"><button type="submit" id="loginButton">Access library</button></div></form>
+      <p class="fine">This pilot uses a shared access code. It is not connected to member accounts yet.</p>
+    </section>
+    <section id="librarySection" class="library" hidden>
+      <div class="toolbar"><div id="countLabel" aria-live="polite">Legal resources</div><button id="logoutButton" class="textButton">Sign out</button></div>
+      <form id="searchForm" class="searchbar"><label for="search" class="sr-only">Search the library</label><input id="search" type="search" placeholder="Search open meetings, municipal authority, public records..." autocomplete="off" maxlength="160"><button type="submit">Search</button></form>
+      <div class="filters"><label for="typeFilter">Resource type</label><select id="typeFilter"><option value="">All formats</option><option value=".pdf">PDF</option><option value=".docx">Word</option><option value=".doc">Older Word</option><option value=".rtf">RTF</option></select><p id="resultsSummary" aria-live="polite"></p></div>
+      <div id="results" class="results"><div class="empty"><h2>Search the legal collection</h2><p>Use legal terms, article titles, or phrases. Results are ranked by matching text and title.</p></div></div>
+      <div id="paging" class="paging" hidden><button id="prevPage" type="button">Previous</button><span id="pageLabel"></span><button id="nextPage" type="button">Next</button></div>
+    </section>
+  </main>
+  <footer class="wrap foot">These materials may include historical guidance. Confirm the publication date and current law before relying on any resource. Search results do not constitute legal advice.</footer>
+</body>
+</html>

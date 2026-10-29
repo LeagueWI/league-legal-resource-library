@@ -1,0 +1,21 @@
+name = "league-legal-library-api"
+main = "src/index.js"
+compatibility_date = "2026-10-01"
+workers_dev = true
+
+[vars]
+# Exact GitHub Pages origin. For LeagueWI Pages this is independent of the repository name.
+ALLOWED_ORIGIN = "https://leaguewi.github.io"
+
+[[r2_buckets]]
+binding = "LEGAL_FILES"
+bucket_name = "league-legal-private"
+
+[[d1_databases]]
+binding = "DB"
+database_name = "league-legal-search"
+database_id = "REPLACE_WITH_YOUR_D1_DATABASE_ID"
+
+# Required Worker secrets, supplied in Cloudflare dashboard, never committed:
+# ACCESS_CODE_HASH (SHA-256 hex of temporary access code)
+# SESSION_SECRET (random 32+ bytes, represented as a long random string)

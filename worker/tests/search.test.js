@@ -1,0 +1,5 @@
+import test from 'node:test';import assert from 'node:assert/strict';import {__testing} from '../src/index.js';
+test('tokens normalize and bound user input',()=>{assert.deepEqual(__testing.tokenize('Open OPEN meeting'),['open','meeting']);});
+test('snippet is about matching language',()=>{const x='advertisement '.repeat(100)+'The council discussed open meetings and the public records law.';const s=__testing.bestSnippet(x,['open','meetings']);assert.match(s,/open meetings/);});
+test('ranking favors exact legal phrase',()=>{const base={title:'Unrelated',body:'the council met',fts_rank:0,status:'searchable'};const rich={...base,title:'Open Meetings Guide',body:'Wisconsin open meetings law'};assert.ok(__testing.rank(rich,['open','meetings'],'open meetings')>__testing.rank(base,['open','meetings'],'open meetings'));});
+test('session signature roundtrip and tampering rejection',async()=>{const env={SESSION_SECRET:'x'.repeat(60)};const s=await __testing.createSession(env);assert.equal(await __testing.validSession('Bearer '+s,env),true);assert.equal(await __testing.validSession('Bearer '+s+'a',env),false);assert.equal(await __testing.validSession(null,env),false);});
